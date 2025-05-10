@@ -1,0 +1,42 @@
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .p-datatable .p-datatable-thead > tr > th,
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem !important;
+    font-size: 0.8rem;
+  }
+  
+  .p-datatable .p-column-title {
+    display: none;
+  }
+  
+  .p-dialog {
+    width: 95vw !important;
+  }
+}
+
+/* Compact table view */
+.p-datatable {
+  font-size: 0.9rem;
+}
+
+/* Form styling */
+.p-fluid .field {
+  margin-bottom: 1rem;
+}
+
+/* Tag styling */
+.p-tag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Card styling */
+.p-card {
+  margin-bottom: 1rem;
+}
+
+/* Tab styling */
+.p-tabview .p-tabview-nav {
+  margin-bottom: 1rem;
+}
