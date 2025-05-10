@@ -6,9 +6,10 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import axios from "axios";
-import "primereact/resources/themes/fluent-light/theme.css";
+import "primereact/resources/themes/bootstrap4-dark-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import "primeflex/primeflex.css";
 
 const PayrollDashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -20,7 +21,11 @@ const PayrollDashboard = () => {
     salary: "",
   });
   const [isEdit, setIsEdit] = useState(false);
+  const [deleteEmployeeDialog, setDeleteEmployeeDialog] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+
   const toastRef = useRef(null);
+  const dt = useRef(null);
 
   const fetchEmployees = async () => {
     const res = await axios.get("http://localhost:5000/api/employees");
@@ -42,11 +47,7 @@ const PayrollDashboard = () => {
   };
 
   const saveEmployee = async () => {
-    if (
-      !currentEmployee.name ||
-      !currentEmployee.position ||
-      !currentEmployee.salary
-    ) {
+    if (!currentEmployee.name || !currentEmployee.position || !currentEmployee.salary) {
       toastRef.current.show({
         severity: "error",
         summary: "Validation Error",
@@ -66,10 +67,7 @@ const PayrollDashboard = () => {
           detail: "Employee updated",
         });
       } else {
-        await axios.post(
-          "http://localhost:5000/api/employees",
-          currentEmployee
-        );
+        await axios.post("http://localhost:5000/api/employees", currentEmployee);
         toastRef.current.show({
           severity: "success",
           summary: "Added",
@@ -93,45 +91,106 @@ const PayrollDashboard = () => {
     setEmployeeDialog(true);
   };
 
-  const deleteEmployee = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this record?")) return;
-    await axios.delete(`http://localhost:5000/api/employees/${id}`);
-    fetchEmployees();
-    toastRef.current.show({
-      severity: "success",
-      summary: "Deleted",
-      detail: "Employee deleted",
-    });
+  const promptDeleteEmployee = (employee) => {
+    setEmployeeToDelete(employee);
+    setDeleteEmployeeDialog(true);
+  };
+
+  const confirmDeleteEmployee = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/employees/${employeeToDelete.id}`);
+      setDeleteEmployeeDialog(false);
+      fetchEmployees();
+      toastRef.current.show({
+        severity: "success",
+        summary: "Deleted",
+        detail: `Employee "${employeeToDelete.name}" deleted`,
+      });
+      setEmployeeToDelete(null);
+    } catch (error) {
+      toastRef.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to delete employee",
+      });
+    }
   };
 
   const employeeDialogFooter = (
     <>
+      <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
+      <Button label="Save" icon="pi pi-check" className="p-button-text" onClick={saveEmployee} />
+    </>
+  );
+
+  const deleteEmployeeDialogFooter = (
+    <>
       <Button
-        label="Cancel"
+        label="No"
         icon="pi pi-times"
         className="p-button-text"
-        onClick={hideDialog}
+        onClick={() => setDeleteEmployeeDialog(false)}
       />
       <Button
-        label="Save"
+        label="Yes"
         icon="pi pi-check"
         className="p-button-text"
-        onClick={saveEmployee}
+        onClick={confirmDeleteEmployee}
       />
     </>
   );
 
+  const exportCSV = () => {
+    dt.current.exportCSV();
+  };
+
+  const actionBodyTemplate = (rowData) => {
+    return (
+      <>
+        <Button
+          icon="pi pi-pencil"
+          rounded
+          outlined
+          className="mr-2"
+          onClick={() => editEmployee(rowData)}
+        />
+        <Button
+          icon="pi pi-trash"
+          rounded
+          outlined
+          severity="danger"
+          onClick={() => promptDeleteEmployee(rowData)}
+        />
+      </>
+    );
+  };
+
   return (
-    <div className="p-m-4">
+    <div className="p-m-4 w-[100vw] h-[100vh] px-5">
       <Toast ref={toastRef} />
       <div className="p-d-flex p-jc-between p-ai-center mb-3">
-        <h2>Payroll Management</h2>
-        <Button label="Add Employee" icon="pi pi-plus" onClick={openNew} />
+        <h2 className="text-xl pt-1">Master - Employee</h2>
+        <div className="flex justify-between gap-2">
+          <Button label="Add Employee" icon="pi pi-plus" onClick={openNew} />
+          <Button
+            label="Export"
+            type="button"
+            icon="pi pi-upload"
+            rounded
+            onClick={() => exportCSV(false)}
+            data-pr-tooltip="CSV"
+          />
+        </div>
       </div>
+
       <DataTable
+        ref={dt}
+        style={{ minWidth: "90vw" }}
+        resizableColumns
         value={employees}
         paginator
-        rows={5}
+        rows={10}
+        size={"small"}
         globalFilter={globalFilter}
         header={
           <InputText
@@ -140,28 +199,17 @@ const PayrollDashboard = () => {
           />
         }
       >
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="position" header="Position" sortable></Column>
-        <Column field="salary" header="Salary" sortable></Column>
+        <Column field="name" header="Name" sortable />
+        <Column field="position" header="Position" sortable />
+        <Column field="salary" header="Salary" sortable />
         <Column
-          header="Actions"
-          body={(rowData) => (
-            <>
-              <Button
-                icon="pi pi-pencil"
-                className="p-button-rounded p-button-warning p-mr-2"
-                onClick={() => editEmployee(rowData)}
-              />
-              <Button
-                icon="pi pi-trash"
-                className="p-button-rounded p-button-danger"
-                onClick={() => deleteEmployee(rowData.id)}
-              />
-            </>
-          )}
-        ></Column>
+          body={actionBodyTemplate}
+          exportable={false}
+          style={{ width: "5rem" }}
+        />
       </DataTable>
 
+      {/* Employee Create/Edit Dialog */}
       <Dialog
         visible={employeeDialog}
         style={{ width: "400px" }}
@@ -212,6 +260,26 @@ const PayrollDashboard = () => {
               keyfilter="pint"
             />
           </div>
+        </div>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        visible={deleteEmployeeDialog}
+        style={{ width: "32rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Confirm"
+        modal
+        footer={deleteEmployeeDialogFooter}
+        onHide={() => setDeleteEmployeeDialog(false)}
+      >
+        <div className="confirmation-content flex items-center">
+          <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
+          {employeeToDelete && (
+            <span>
+              Are you sure you want to delete <b>{employeeToDelete.name}</b>?
+            </span>
+          )}
         </div>
       </Dialog>
     </div>
