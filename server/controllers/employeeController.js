@@ -1,7 +1,7 @@
 const Employee = require('../models/employeeModel');
 
 const requiredFields = [
-  "e_id", "first_name", "last_name", "suffix", "gender", "birthday",
+  "e_id", "first_name", "last_name", "gender", "birthday",
   "phone_no", "email", "street_address", "city", "province", "zip",
   "department", "project", "team", "position", "employment", "date_hired",
   "base_monthly_pay", "user_profile", "pay_frequency", "tax_id",

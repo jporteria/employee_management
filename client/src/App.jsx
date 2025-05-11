@@ -214,7 +214,7 @@ const PayrollDashboard = () => {
   );
 
   return (
-    <div className="p-m-4 w-[100vw] h-[100vh] px-5">
+    <div className="w-[99vw] h-[100vh] px-5">
       <Toast ref={toastRef} />
       <div className="flex items-center my-3">
         <h2 className="text-2xl whitespace-nowrap mr-5">Master - Employee</h2>
@@ -236,7 +236,7 @@ const PayrollDashboard = () => {
         </div>
       </div>
 
-      <div style={{ overflowX: "auto" }}>
+      <div>
         <DataTable
           style={{ background: "var(--primary-color)" }}
           ref={dt}
