@@ -1,3 +1,18 @@
+.p-dialog-header-close	{
+  background: white;
+  color: red;
+}
+
+.p-datepicker .p-datepicker-month,
+.p-datepicker .p-datepicker-year {
+  background-color: var(--primary-color);
+  color:black;
+}
+.p-datepicker .p-datepicker-next,
+.p-datepicker .p-datepicker-prev{
+  display: none;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 768px) {
   .p-datatable .p-datatable-thead > tr > th,

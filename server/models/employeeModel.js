@@ -33,7 +33,7 @@ class Employee {
 
       const [existing] = await db.query('SELECT * FROM employees WHERE e_id = ?', [e_id]);
       if (existing.length > 0) {
-        throw new Error('Employee ID (e_id) already exists.');
+        throw new Error(`Employee ID ${e_id} already exists.`);
       }
 
       const [result] = await db.query(`
@@ -71,7 +71,7 @@ class Employee {
     try {
       const [existing] = await db.query('SELECT * FROM employees WHERE e_id = ? AND id != ?', [e_id, id]);
       if (existing.length > 0) {
-        throw new Error('Employee ID (e_id) already exists for another employee.');
+        throw new Error(`Employee ID ${e_id} already exists for another employee.`);
       }
 
       const [result] = await db.query(`
