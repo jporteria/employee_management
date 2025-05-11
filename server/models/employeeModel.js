@@ -2,34 +2,113 @@ const db = require('../config/db');
 
 class Employee {
   static async getAll() {
-    const [rows] = await db.query('SELECT * FROM employees');
-    return rows;
+    try {
+      const [rows] = await db.query('SELECT * FROM employees');
+      return rows;
+    } catch (error) {
+      console.error('Error in getAll:', error);
+      throw error;
+    }
   }
 
   static async getById(id) {
-    const [rows] = await db.query('SELECT * FROM employees WHERE id = ?', [id]);
-    return rows[0];
+    try {
+      const [rows] = await db.query('SELECT * FROM employees WHERE id = ?', [id]);
+      return rows[0];
+    } catch (error) {
+      console.error('Error in getById:', error);
+      throw error;
+    }
   }
 
-  static async create({ name, position, salary }) {
-    const [result] = await db.query(
-      'INSERT INTO employees (name, position, salary) VALUES (?, ?, ?)',
-      [name, position, salary]
-    );
-    return { id: result.insertId, name, position, salary };
+  static async create(data) {
+    try {
+      const {
+        e_id, first_name, middle_name, last_name, suffix, gender, birthday,
+        phone_no, email, street_address, city, province, zip, department,
+        project, team, position, employment, date_hired, base_monthly_pay,
+        user_profile, pay_frequency, tax_id, sss_gsis_no, phic_id,
+        hdmf_id, bank, bank_account
+      } = data;
+
+      const [existing] = await db.query('SELECT * FROM employees WHERE e_id = ?', [e_id]);
+      if (existing.length > 0) {
+        throw new Error('Employee ID (e_id) already exists.');
+      }
+
+      const [result] = await db.query(`
+        INSERT INTO employees (
+          e_id, first_name, middle_name, last_name, suffix, gender, birthday,
+          phone_no, email, street_address, city, province, zip, department,
+          project, team, position, employment, date_hired, base_monthly_pay,
+          user_profile, pay_frequency, tax_id, sss_gsis_no, phic_id,
+          hdmf_id, bank, bank_account, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      `, [
+        e_id, first_name, middle_name, last_name, suffix, gender, birthday,
+        phone_no, email, street_address, city, province, zip, department,
+        project, team, position, employment, date_hired, base_monthly_pay,
+        user_profile, pay_frequency, tax_id, sss_gsis_no, phic_id,
+        hdmf_id, bank, bank_account
+      ]);
+
+      return { id: result.insertId, ...data };
+    } catch (error) {
+      console.error('Error in create:', error.message);
+      throw error;
+    }
   }
 
-  static async update(id, { name, position, salary }) {
-    await db.query(
-      'UPDATE employees SET name = ?, position = ?, salary = ? WHERE id = ?',
-      [name, position, salary, id]
-    );
-    return { id, name, position, salary };
+  static async updateById(id, data) {
+    const {
+      e_id, first_name, middle_name, last_name, suffix, gender, birthday,
+      phone_no, email, street_address, city, province, zip, department,
+      project, team, position, employment, date_hired, base_monthly_pay,
+      user_profile, pay_frequency, tax_id, sss_gsis_no, phic_id,
+      hdmf_id, bank, bank_account
+    } = data;
+
+    try {
+      const [existing] = await db.query('SELECT * FROM employees WHERE e_id = ? AND id != ?', [e_id, id]);
+      if (existing.length > 0) {
+        throw new Error('Employee ID (e_id) already exists for another employee.');
+      }
+
+      const [result] = await db.query(`
+        UPDATE employees SET
+          e_id = ?, first_name = ?, middle_name = ?, last_name = ?, suffix = ?, gender = ?, birthday = ?,
+          phone_no = ?, email = ?, street_address = ?, city = ?, province = ?, zip = ?, department = ?,
+          project = ?, team = ?, position = ?, employment = ?, date_hired = ?, base_monthly_pay = ?,
+          user_profile = ?, pay_frequency = ?, tax_id = ?, sss_gsis_no = ?, phic_id = ?,
+          hdmf_id = ?, bank = ?, bank_account = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `, [
+        e_id, first_name, middle_name, last_name, suffix, gender, birthday,
+        phone_no, email, street_address, city, province, zip, department,
+        project, team, position, employment, date_hired, base_monthly_pay,
+        user_profile, pay_frequency, tax_id, sss_gsis_no, phic_id,
+        hdmf_id, bank, bank_account, id
+      ]);
+
+      if (result.affectedRows === 0) {
+        throw new Error('No employee updated. ID may not exist.');
+      }
+
+      return { id, ...data };
+    } catch (error) {
+      console.error('Error in updateById:', error.message);
+      throw error;
+    }
   }
 
-  static async delete(id) {
-    await db.query('DELETE FROM employees WHERE id = ?', [id]);
-    return true;
+  static async deleteById(id) {
+    try {
+      await db.query('DELETE FROM employees WHERE id = ?', [id]);
+      return true;
+    } catch (error) {
+      console.error('Error in deleteById:', error);
+      throw error;
+    }
   }
 }
 
