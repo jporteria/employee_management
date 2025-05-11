@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { Calendar } from "primereact/calendar";
-import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import axios from "axios";
 import "./App.css";
@@ -12,66 +8,10 @@ import "primereact/resources/themes/bootstrap4-dark-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-
-const initialEmployee = {
-  e_id: "",
-  first_name: "",
-  middle_name: "",
-  last_name: "",
-  suffix: "",
-  gender: "",
-  birthday: "",
-  phone_no: "",
-  email: "",
-  street_address: "",
-  city: "",
-  province: "",
-  zip: "",
-  department: "",
-  project: "",
-  team: "",
-  position: "",
-  employment: "",
-  date_hired: "",
-  base_monthly_pay: "",
-  user_profile: "",
-  pay_frequency: "",
-  tax_id: "",
-  sss_gsis_no: "",
-  phic_id: "",
-  hdmf_id: "",
-  bank: "",
-  bank_account: "",
-};
-
-const requiredFields = [
-  "e_id",
-  "first_name",
-  "last_name",
-  "gender",
-  "birthday",
-  "phone_no",
-  "email",
-  "street_address",
-  "city",
-  "province",
-  "zip",
-  "department",
-  "project",
-  "team",
-  "position",
-  "employment",
-  "date_hired",
-  "base_monthly_pay",
-  "user_profile",
-  "pay_frequency",
-  "tax_id",
-  "sss_gsis_no",
-  "phic_id",
-  "hdmf_id",
-  "bank",
-  "bank_account",
-];
+import { initialEmployee } from "./constants/employeeFields";
+import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
+import EmployeeForm from "./components/EmployeeForm";
+import EmployeeTable from "./components/EmployeeTable";
 
 const PayrollDashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -81,6 +21,15 @@ const PayrollDashboard = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [deleteEmployeeDialog, setDeleteEmployeeDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [selectedColumns, setSelectedColumns] = useState([
+    "e_id",
+    "last_name",
+    "first_name",
+    "middle_name",
+    "position",
+    "province",
+  ]);
+
   const toastRef = useRef(null);
   const dt = useRef(null);
 
@@ -167,34 +116,13 @@ const PayrollDashboard = () => {
         summary: "Error",
         detail: "Failed to delete employee",
       });
+      console.log(error);
     }
   };
 
   const exportCSV = () => {
     dt.current.exportCSV();
   };
-
-  const actionBodyTemplate = (rowData) => (
-    <>
-      <Button
-        style={{ background: "yellow" }}
-        icon="pi pi-pencil"
-        rounded
-        outlined
-        className="mr-2"
-        severity="secondary"
-        onClick={() => editEmployee(rowData)}
-      />
-      <Button
-        style={{ background: "red" }}
-        icon="pi pi-trash"
-        rounded
-        outlined
-        // severity="danger"
-        onClick={() => promptDeleteEmployee(rowData)}
-      />
-    </>
-  );
 
   const employeeDialogFooter = (
     <>
@@ -216,8 +144,10 @@ const PayrollDashboard = () => {
   return (
     <div className="w-[99vw] h-[100vh] px-5">
       <Toast ref={toastRef} />
-      <div className="flex items-center my-3">
-        <h2 className="text-2xl whitespace-nowrap mr-5">Master - Employee</h2>
+      <div className="flex items-center my-3 max-md:flex-col">
+        <h2 className="text-2xl whitespace-nowrap mr-5 max-md:mb-5">
+          Master - Employee
+        </h2>
         <div className="flex w-full justify-between gap-2">
           <Button
             raised
@@ -237,35 +167,16 @@ const PayrollDashboard = () => {
       </div>
 
       <div>
-        <DataTable
-          style={{ background: "var(--primary-color)" }}
-          ref={dt}
-          value={employees}
-          paginator
-          rows={10}
-          size="small"
-          removableSort
+        <EmployeeTable
+          dt={dt}
+          employees={employees}
           globalFilter={globalFilter}
-          header={
-            <InputText
-              placeholder="Search..."
-              onInput={(e) => setGlobalFilter(e.target.value)}
-            />
-          }
-        >
-          <Column sortable field="e_id" header="Employee ID" />
-          <Column sortable field="last_name" header="Last Name" />
-          <Column sortable field="first_name" header="First Name" />
-          <Column sortable field="middle_name" header="Middle Name" />
-          <Column sortable field="position" header="Position" />
-          <Column sortable field="province" header="Province" />
-          <Column
-            body={actionBodyTemplate}
-            exportable={false}
-            frozen
-            alignFrozen="right"
-          />
-        </DataTable>
+          setGlobalFilter={setGlobalFilter}
+          selectedColumns={selectedColumns}
+          setSelectedColumns={setSelectedColumns}
+          editEmployee={editEmployee}
+          promptDeleteEmployee={promptDeleteEmployee}
+        />
       </div>
 
       <Dialog
@@ -277,103 +188,18 @@ const PayrollDashboard = () => {
         footer={employeeDialogFooter}
         onHide={hideDialog}
       >
-        <div className="p-fluid grid">
-          {Object.keys(initialEmployee).map((key) => (
-            <div key={key} className="col-12 md:col-6 mb-3">
-              <label htmlFor={key} className="block mb-1 capitalize">
-                {key.replace(/_/g, " ").replace(/([A-Z])/g, " $1")}
-                {requiredFields.includes(key) && (
-                  <span style={{ color: "red", marginLeft: "4px" }}>*</span>
-                )}
-              </label>
-
-              {key === "birthday" || key === "date_hired" ? (
-                <Calendar
-                  showIcon
-                  icon="pi pi-calendar"
-                  id={key}
-                  value={
-                    currentEmployee[key]
-                      ? new Date(currentEmployee[key])
-                      : undefined
-                  }
-                  onChange={(e) => {
-                    const selectedDate = e.value;
-                    if (selectedDate) {
-                      // Normalize selected date by resetting the time to 00:00:00
-                      const normalizedDate = new Date(selectedDate);
-                      normalizedDate.setHours(0, 0, 0, 0); // Ensure no time component is included
-                      setCurrentEmployee({
-                        ...currentEmployee,
-                        [key]: normalizedDate.toISOString().split("T")[0], // Save only the date part
-                      });
-                    } else {
-                      setCurrentEmployee({
-                        ...currentEmployee,
-                        [key]: null, // Clear the date if none is selected
-                      });
-                    }
-                  }}
-                  dateFormat="yy-mm-dd"
-                />
-              ) : (
-                <InputText
-                  id={key}
-                  value={currentEmployee[key] || ""}
-                  onChange={(e) =>
-                    setCurrentEmployee({
-                      ...currentEmployee,
-                      [key]: e.target.value,
-                    })
-                  }
-                />
-              )}
-            </div>
-          ))}
-        </div>
+        <EmployeeForm
+          currentEmployee={currentEmployee}
+          setCurrentEmployee={setCurrentEmployee}
+        />
       </Dialog>
 
-      <Dialog
-        closeIcon="pi pi-times"
+      <DeleteConfirmDialog
         visible={deleteEmployeeDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={
-          <>
-            <Button
-              label="No"
-              icon="pi pi-times"
-              className="p-button-text"
-              onClick={() => setDeleteEmployeeDialog(false)}
-            />
-            <Button
-              label="Yes"
-              icon="pi pi-check"
-              className="p-button-text"
-              onClick={confirmDeleteEmployee}
-            />
-          </>
-        }
         onHide={() => setDeleteEmployeeDialog(false)}
-      >
-        <div className="confirmation-content flex items-center">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {employeeToDelete && (
-            <span>
-              Are you sure you want to delete{" "}
-              <b>
-                {employeeToDelete.first_name} {employeeToDelete.last_name}
-              </b>
-              ?
-            </span>
-          )}
-        </div>
-      </Dialog>
+        onConfirm={confirmDeleteEmployee}
+        employee={employeeToDelete}
+      />
     </div>
   );
 };

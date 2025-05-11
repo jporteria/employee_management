@@ -21,12 +21,13 @@
     font-size: 0.8rem;
   }
   
-  .p-datatable .p-column-title {
-    display: none;
-  }
   
   .p-dialog {
     width: 95vw !important;
+  }
+
+  .p-datatable{
+    width: 100% !important;
   }
 }
 
@@ -37,21 +38,5 @@
 
 /* Form styling */
 .p-fluid .field {
-  margin-bottom: 1rem;
-}
-
-/* Tag styling */
-.p-tag {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-}
-
-/* Card styling */
-.p-card {
-  margin-bottom: 1rem;
-}
-
-/* Tab styling */
-.p-tabview .p-tabview-nav {
   margin-bottom: 1rem;
 }
