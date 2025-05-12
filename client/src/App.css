@@ -13,6 +13,18 @@
   display: none;
 }
 
+.p-toast .p-toast-message .p-toast-icon-close::before {
+  content: "\e90b";
+  font-family: "PrimeIcons";
+  color: red;
+}
+.p-multiselect-close{
+  display: none;
+}
+.p-paginator{
+  gap: 5px;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 768px) {
   .p-datatable .p-datatable-thead > tr > th,

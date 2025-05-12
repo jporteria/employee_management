@@ -1,5 +1,6 @@
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
 import { columnOptions } from "../constants/employeeFields";
@@ -16,20 +17,18 @@ const EmployeeTable = ({
 }) => {
   const actionBodyTemplate = (rowData) => (
     <>
-      <button
-        style={{ background: "yellow" }}
+      <Button
+        style={{ background: "#edc001", color: "#232323" }}
         className="p-button p-button-rounded p-button-outlined mr-2"
         onClick={() => editEmployee(rowData)}
-      >
-        <i className="pi pi-pencil"></i>
-      </button>
-      <button
+        icon="pi pi-pencil"
+      />
+      <Button
         style={{ background: "red" }}
         className="p-button p-button-rounded p-button-outlined"
         onClick={() => promptDeleteEmployee(rowData)}
-      >
-        <i className="pi pi-trash"></i>
-      </button>
+        icon="pi pi-trash"
+      />
     </>
   );
 
@@ -42,6 +41,7 @@ const EmployeeTable = ({
       rows={10}
       size="small"
       removableSort
+      resizableColumns
       globalFilter={globalFilter}
       header={
         <div className="flex justify-between items-center">
@@ -83,13 +83,13 @@ const EmployeeTable = ({
         <Column sortable field="city" header="City" />
       )}
       {selectedColumns.includes("address") && (
-        <Column sortable field="address" header="Address" />
+        <Column sortable field="street_address" header="Street Address" />
       )}
       {selectedColumns.includes("postal_code") && (
-        <Column sortable field="postal_code" header="Postal Code" />
+        <Column sortable field="zip" header="Zip Code" />
       )}
       {selectedColumns.includes("phone") && (
-        <Column sortable field="phone" header="Phone" />
+        <Column sortable field="phone_no" header="Phone" />
       )}
       {selectedColumns.includes("email") && (
         <Column sortable field="email" header="Email" />
@@ -101,16 +101,16 @@ const EmployeeTable = ({
         <Column sortable field="birthday" header="Birthday" />
       )}
       {selectedColumns.includes("sss_id") && (
-        <Column sortable field="sss_id" header="SSS ID" />
+        <Column sortable field="sss_gsis_no" header="SSS/GSIS" />
       )}
       {selectedColumns.includes("tin") && (
-        <Column sortable field="tin" header="TIN" />
+        <Column sortable field="tax_id" header="TIN" />
       )}
       {selectedColumns.includes("philhealth_id") && (
-        <Column sortable field="philhealth_id" header="PhilHealth ID" />
+        <Column sortable field="phic_id" header="PhilHealth" />
       )}
       {selectedColumns.includes("pagibig_id") && (
-        <Column sortable field="pagibig_id" header="PAG-IBIG ID" />
+        <Column sortable field="hdmf_id" header="PAG-IBIG" />
       )}
       {selectedColumns.includes("date_hired") && (
         <Column sortable field="date_hired" header="Date Hired" />
