@@ -1,8 +1,26 @@
+import { useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { InputText } from "primereact/inputtext";
 import { initialEmployee, requiredFields } from "../constants/employeeFields";
 
 const EmployeeForm = ({ currentEmployee, setCurrentEmployee }) => {
+  const [errors, setErrors] = useState({});
+
+  const validateField = (key, value) => {
+    if (key === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        setErrors((prev) => ({ ...prev, email: "Invalid email address" }));
+      } else {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.email;
+          return newErrors;
+        });
+      }
+    }
+  };
+
   return (
     <div className="p-fluid grid">
       {Object.keys(initialEmployee).map((key) => (
@@ -38,16 +56,24 @@ const EmployeeForm = ({ currentEmployee, setCurrentEmployee }) => {
               dateFormat="yy-mm-dd"
             />
           ) : (
-            <InputText
-              id={key}
-              value={currentEmployee[key] || ""}
-              onChange={(e) =>
-                setCurrentEmployee({
-                  ...currentEmployee,
-                  [key]: e.target.value,
-                })
-              }
-            />
+            <>
+              <InputText
+                id={key}
+                value={currentEmployee[key] || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCurrentEmployee({
+                    ...currentEmployee,
+                    [key]: value,
+                  });
+                  if (key === "email") {
+                    validateField(key, value);
+                  }
+                }}
+                className={errors[key] ? "p-invalid" : ""}
+              />
+              {errors[key] && <small className="p-error">{errors[key]}</small>}
+            </>
           )}
         </div>
       ))}

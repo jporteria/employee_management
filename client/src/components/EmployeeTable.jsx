@@ -100,9 +100,6 @@ const EmployeeTable = ({
       {selectedColumns.includes("birthday") && (
         <Column sortable field="birthday" header="Birthday" />
       )}
-      {selectedColumns.includes("civil_status") && (
-        <Column sortable field="civil_status" header="Civil Status" />
-      )}
       {selectedColumns.includes("sss_id") && (
         <Column sortable field="sss_id" header="SSS ID" />
       )}
