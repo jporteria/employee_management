@@ -7,7 +7,9 @@ A full-stack CRUD application that replicates the Master Table feature from Mani
 - ✅ Create, Read, Update, and Delete (CRUD) employee records  
 - 🔍 Searchable and sortable data table  
 - 🧾 Input validation with clear error messages  
-- 🎨 Responsive, user-friendly UI using PrimeReact  
+- 🎨 Responsive, user-friendly UI using PrimeReact
+- 🕒 Activity Log to track employee actions and history
+- 🌓 Light/Dark Theme Toggle with persistent selection  
 
 ## 🛠️ Tech Stack
 
