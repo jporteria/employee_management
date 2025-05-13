@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const employeeRoutes = require('./routes/employeeRoutes');
+const activityRoutes = require('./routes/activityRoutes');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/employees', employeeRoutes);
+app.use('/api', activityRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {

@@ -25,6 +25,29 @@
   gap: 5px;
 }
 
+
+/* For light theme */
+.theme-toggle-button .p-button {
+  background-color: white;
+  color: black;
+  border: 1px solid #ced4da;
+}
+
+/* For dark theme when active */
+.theme-toggle-button .p-button.p-highlight {
+  background-color: black;
+  color: white;
+}
+
+/*Hover effects */
+.theme-toggle-button .p-button:not(.p-highlight):hover {
+  background-color: #f8f9fa;
+}
+
+.theme-toggle-button .p-button.p-highlight:hover {
+  background-color: #343a40;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 768px) {
   .p-datatable .p-datatable-thead > tr > th,

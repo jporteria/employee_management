@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
+import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import axios from "axios";
 import "./App.css";
@@ -12,6 +12,7 @@ import { initialEmployee } from "./constants/employeeFields";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import EmployeeForm from "./components/EmployeeForm";
 import EmployeeTable from "./components/EmployeeTable";
+import ActivityLogDialog from "./components/ActivityLogDialog";
 
 const PayrollDashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -35,11 +36,19 @@ const PayrollDashboard = () => {
   const toastRef = useRef(null);
   const dt = useRef(null);
 
-  const logActivity = (action, employee) => {
-    const timestamp = new Date().toLocaleString();
-    const message = `${action} - ${employee.first_name} ${employee.last_name} (Employee ID: ${employee.e_id}) at ${timestamp}`;
-
-    setActivityLog((prev) => [message, ...prev]);
+  const fetchActivityLogs = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/activity-logs");
+      const formatted = res.data.map((log) => {
+        const timestamp = new Date(log.timestamp).toLocaleString();
+        return `${log.action.toUpperCase()} - ${
+          log.description
+        } at ${timestamp}`;
+      });
+      setActivityLog(formatted);
+    } catch (error) {
+      console.error("Failed to fetch activity logs", error);
+    }
   };
 
   const applyTheme = (themeName) => {
@@ -94,6 +103,7 @@ const PayrollDashboard = () => {
     }
 
     fetchEmployees();
+    fetchActivityLogs();
   }, []);
 
   const openNew = () => {
@@ -113,18 +123,18 @@ const PayrollDashboard = () => {
           `http://localhost:5000/api/employees/${currentEmployee.id}`,
           currentEmployee
         );
-        logActivity("Updated", currentEmployee);
+        fetchActivityLogs();
         toastRef.current.show({
           severity: "success",
           summary: "Updated",
           detail: "Employee updated",
         });
       } else {
-        const res = await axios.post(
+        await axios.post(
           "http://localhost:5000/api/employees",
           currentEmployee
         );
-        logActivity("Added", res.data);
+        fetchActivityLogs();
         toastRef.current.show({
           severity: "success",
           summary: "Added",
@@ -162,7 +172,7 @@ const PayrollDashboard = () => {
       );
       setDeleteEmployeeDialog(false);
       fetchEmployees();
-      logActivity("Deleted", employeeToDelete);
+      fetchActivityLogs();
       toastRef.current.show({
         severity: "success",
         summary: "Deleted",
@@ -209,35 +219,46 @@ const PayrollDashboard = () => {
         <div className="flex w-full justify-between gap-2">
           <Button
             raised
-            style={{ background: "#77dd77" }}
+            style={{ background: "#77dd77", color: "black" }}
             label="Add Employee"
             icon="pi pi-plus"
             onClick={openNew}
           />
-          <Button
-            style={{ background: "var(--primary-color)" }}
-            raised
-            label="Export"
-            icon="pi pi-upload"
-            onClick={() => exportCSV(false)}
-          />
-          <Button
-            label={isDarkMode ? "Light Mode" : "Dark Mode"}
-            icon={isDarkMode ? "pi pi-sun" : "pi pi-moon"}
-            onClick={toggleTheme}
-            raised
-            style={isDarkMode ? {} : { background: "black" }}
-          />
-          <Button
-            icon="pi pi-clock"
-            label="Activity Log"
-            raised
-            onClick={() => setActivityDialogVisible(true)}
-          />
+          <div className="flex gap-2 items-center">
+            <Button
+              style={{ background: "#e0f7fa", color: "black" }}
+              label="Export to CSV"
+              icon="pi pi-upload"
+              onClick={() => exportCSV(false)}
+            />
+            <Button
+              icon="pi pi-clock"
+              style={{ background: "#fff3cd", color: "black" }}
+              label="Activity Log"
+              onClick={() => setActivityDialogVisible(true)}
+            />
+            <SelectButton
+              value={isDarkMode ? "Dark" : "Light"}
+              options={["Light", "Dark"]}
+              onChange={(e) => {
+                const selected = e.value === "Dark";
+                if (selected !== isDarkMode) toggleTheme();
+              }}
+              itemTemplate={(option) => (
+                <i
+                  className={`pi ${option === "Dark" ? "pi-moon" : "pi-sun"}`}
+                />
+              )}
+              // className="p-button-rounded"
+              className="theme-toggle-button"
+              tooltip="Toggle Theme"
+              tooltipOptions={{ position: "left" }}
+            />
+          </div>
         </div>
       </div>
 
-      <div>
+      <div style={{ backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
         <EmployeeTable
           dt={dt}
           employees={employees}
@@ -250,50 +271,25 @@ const PayrollDashboard = () => {
         />
       </div>
 
-      <Dialog
-        closeIcon="pi pi-times"
+      <EmployeeForm
+        currentEmployee={currentEmployee}
+        setCurrentEmployee={setCurrentEmployee}
         visible={employeeDialog}
-        style={{ width: "80vw", maxHeight: "80vh" }}
-        header={isEdit ? "Edit Employee" : "New Employee"}
-        modal
-        footer={employeeDialogFooter}
         onHide={hideDialog}
-      >
-        <EmployeeForm
-          currentEmployee={currentEmployee}
-          setCurrentEmployee={setCurrentEmployee}
-        />
-      </Dialog>
-
+        footer={employeeDialogFooter}
+        isEdit={isEdit}
+      />
       <DeleteConfirmDialog
         visible={deleteEmployeeDialog}
         onHide={() => setDeleteEmployeeDialog(false)}
         onConfirm={confirmDeleteEmployee}
         employee={employeeToDelete}
       />
-
-      {/* activity dialog */}
-      <Dialog
-        header="Activity Log"
+      <ActivityLogDialog
         visible={activityDialogVisible}
-        style={{ width: "40vw" }}
-        modal
         onHide={() => setActivityDialogVisible(false)}
-      >
-        <div className="p-fluid">
-          {activityLog.length === 0 ? (
-            <p className="text-500">No activity yet.</p>
-          ) : (
-            <ul className="m-0 p-0 list-none max-h-60 overflow-y-auto">
-              {activityLog.map((log, index) => (
-                <li key={index} className="mb-2 border-bottom-1 pb-2">
-                  {log}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </Dialog>
+        logs={activityLog}
+      />
     </div>
   );
 };

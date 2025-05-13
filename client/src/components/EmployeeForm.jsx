@@ -1,9 +1,17 @@
 import { useState } from "react";
+import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
 import { InputText } from "primereact/inputtext";
 import { initialEmployee, requiredFields } from "../constants/employeeFields";
 
-const EmployeeForm = ({ currentEmployee, setCurrentEmployee }) => {
+const EmployeeForm = ({
+  currentEmployee,
+  setCurrentEmployee,
+  visible,
+  onHide,
+  footer,
+  isEdit,
+}) => {
   const [errors, setErrors] = useState({});
 
   const validateField = (key, value) => {
@@ -22,62 +30,74 @@ const EmployeeForm = ({ currentEmployee, setCurrentEmployee }) => {
   };
 
   return (
-    <div className="p-fluid grid">
-      {Object.keys(initialEmployee).map((key) => (
-        <div key={key} className="col-12 md:col-6 mb-3">
-          <label htmlFor={key} className="block mb-1 capitalize">
-            {key.replace(/_/g, " ").replace(/([A-Z])/g, " $1")}
-            {requiredFields.includes(key) && (
-              <span style={{ color: "red", marginLeft: "4px" }}>*</span>
-            )}
-          </label>
+    <Dialog
+      closeIcon="pi pi-times"
+      visible={visible}
+      style={{ width: "80vw", maxHeight: "80vh" }}
+      header={isEdit ? "Edit Employee" : "New Employee"}
+      modal
+      footer={footer}
+      onHide={onHide}
+    >
+      <div className="p-fluid grid">
+        {Object.keys(initialEmployee).map((key) => (
+          <div key={key} className="col-12 md:col-6 mb-3">
+            <label htmlFor={key} className="block mb-1 capitalize">
+              {key.replace(/_/g, " ").replace(/([A-Z])/g, " $1")}
+              {requiredFields.includes(key) && (
+                <span style={{ color: "red", marginLeft: "4px" }}>*</span>
+              )}
+            </label>
 
-          {key === "birthday" || key === "date_hired" ? (
-            <Calendar
-              showIcon
-              icon="pi pi-calendar"
-              id={key}
-              value={
-                currentEmployee[key]
-                  ? new Date(currentEmployee[key])
-                  : undefined
-              }
-              onChange={(e) => {
-                const selectedDate = e.value;
-                const normalizedDate = selectedDate
-                  ? new Date(selectedDate).toISOString().split("T")[0]
-                  : null;
-
-                setCurrentEmployee({
-                  ...currentEmployee,
-                  [key]: normalizedDate,
-                });
-              }}
-              dateFormat="yy-mm-dd"
-            />
-          ) : (
-            <>
-              <InputText
+            {key === "birthday" || key === "date_hired" ? (
+              <Calendar
+                showIcon
+                icon="pi pi-calendar"
                 id={key}
-                value={currentEmployee[key] || ""}
+                value={
+                  currentEmployee[key]
+                    ? new Date(currentEmployee[key])
+                    : undefined
+                }
                 onChange={(e) => {
-                  const value = e.target.value;
+                  const selectedDate = e.value;
+                  const normalizedDate = selectedDate
+                    ? new Date(selectedDate).toISOString().split("T")[0]
+                    : null;
+
                   setCurrentEmployee({
                     ...currentEmployee,
-                    [key]: value,
+                    [key]: normalizedDate,
                   });
-                  if (key === "email") {
-                    validateField(key, value);
-                  }
                 }}
-                className={errors[key] ? "p-invalid" : ""}
+                dateFormat="yy-mm-dd"
               />
-              {errors[key] && <small className="p-error">{errors[key]}</small>}
-            </>
-          )}
-        </div>
-      ))}
-    </div>
+            ) : (
+              <>
+                <InputText
+                  id={key}
+                  value={currentEmployee[key] || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentEmployee({
+                      ...currentEmployee,
+                      [key]: value,
+                    });
+                    if (key === "email") {
+                      validateField(key, value);
+                    }
+                  }}
+                  className={errors[key] ? "p-invalid" : ""}
+                />
+                {errors[key] && (
+                  <small className="p-error">{errors[key]}</small>
+                )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </Dialog>
   );
 };
 
