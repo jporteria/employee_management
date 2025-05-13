@@ -39,6 +39,9 @@ const EmployeeTable = ({
       value={employees}
       paginator
       rows={10}
+      rowsPerPageOptions={[5, 10, 25, 50]}
+      paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      currentPageReportTemplate="{first} to {last} of {totalRecords}"
       size="small"
       removableSort
       resizableColumns
