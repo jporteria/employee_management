@@ -1,6 +1,7 @@
 const db = require('../config/db');
 
 class Employee {
+  // Retrieves all employees from the database
   static async getAll() {
     try {
       const [rows] = await db.query('SELECT * FROM employees');
@@ -11,6 +12,7 @@ class Employee {
     }
   }
 
+  // Retrieves a single employee by their ID from the database
   static async getById(id) {
     try {
       const [rows] = await db.query('SELECT * FROM employees WHERE id = ?', [id]);
@@ -21,6 +23,8 @@ class Employee {
     }
   }
 
+  // Creates a new employee in the database
+  // Checks if the employee ID already exists before inserting
   static async create(data) {
     try {
       const {
@@ -59,6 +63,8 @@ class Employee {
     }
   }
 
+  // Updates an existing employee by their ID
+  // Ensures that the employee ID does not conflict with another employee's ID
   static async updateById(id, data) {
     const {
       e_id, first_name, middle_name, last_name, suffix, gender, birthday,
@@ -74,14 +80,14 @@ class Employee {
         throw new Error(`Employee ID ${e_id} already exists for another employee.`);
       }
 
-      const [result] = await db.query(`
+      const [result] = await db.query(` 
         UPDATE employees SET
           e_id = ?, first_name = ?, middle_name = ?, last_name = ?, suffix = ?, gender = ?, birthday = ?,
           phone_no = ?, email = ?, street_address = ?, city = ?, province = ?, zip = ?, department = ?,
           project = ?, team = ?, position = ?, employment = ?, date_hired = ?, base_monthly_pay = ?,
           user_profile = ?, pay_frequency = ?, tax_id = ?, sss_gsis_no = ?, phic_id = ?,
           hdmf_id = ?, bank = ?, bank_account = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
+        WHERE id = ? 
       `, [
         e_id, first_name, middle_name, last_name, suffix, gender, birthday,
         phone_no, email, street_address, city, province, zip, department,
@@ -101,6 +107,7 @@ class Employee {
     }
   }
 
+  // Deletes an employee from the database by their ID
   static async deleteById(id) {
     try {
       await db.query('DELETE FROM employees WHERE id = ?', [id]);

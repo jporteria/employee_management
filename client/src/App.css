@@ -25,6 +25,10 @@
   gap: 5px;
 }
 
+.p-datatable {
+  font-family: 'Arial', 'Helvetica', sans-serif; 
+}
+
 
 /* For light theme */
 .theme-toggle-button .p-button {

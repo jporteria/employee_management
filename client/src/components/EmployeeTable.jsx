@@ -5,16 +5,19 @@ import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
 import { columnOptions } from "../constants/employeeFields";
 
+// Main table for displaying employee records
 const EmployeeTable = ({
-  dt,
-  employees,
-  globalFilter,
-  setGlobalFilter,
-  selectedColumns,
-  setSelectedColumns,
-  editEmployee,
-  promptDeleteEmployee,
+  dt,                    // Ref for exporting/filtering
+  employees,             // Employee data array
+  globalFilter,          // Search term
+  setGlobalFilter,       // Update global filter
+  selectedColumns,       // Currently visible columns
+  setSelectedColumns,    // Update visible columns
+  editEmployee,          // Function to trigger edit modal
+  promptDeleteEmployee,  // Function to trigger delete confirmation
 }) => {
+
+  // Template for action buttons in the rightmost column
   const actionBodyTemplate = (rowData) => (
     <>
       <Button
@@ -36,17 +39,18 @@ const EmployeeTable = ({
     <DataTable
       style={{ background: "var(--primary-color)" }}
       ref={dt}
-      value={employees}
-      paginator
+      value={employees}   
+      paginator     
       rows={10}
       rowsPerPageOptions={[5, 10, 25, 50]}
       paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       currentPageReportTemplate="{first} to {last} of {totalRecords}"
       size="small"
-      removableSort
-      resizableColumns
-      globalFilter={globalFilter}
+      removableSort         
+      resizableColumns  
+      globalFilter={globalFilter}  
       header={
+        // Search bar and column toggle dropdown in header
         <div className="flex justify-between items-center">
           <InputText
             placeholder="Search..."
@@ -64,6 +68,7 @@ const EmployeeTable = ({
         </div>
       }
     >
+      {/* Render columns based on selected fields */}
       {selectedColumns.includes("e_id") && (
         <Column sortable field="e_id" header="Employee ID" />
       )}
@@ -127,6 +132,8 @@ const EmployeeTable = ({
       {selectedColumns.includes("department") && (
         <Column sortable field="department" header="Department" />
       )}
+
+      {/* Action column (Edit/Delete) pinned to right */}
       <Column
         body={actionBodyTemplate}
         exportable={false}

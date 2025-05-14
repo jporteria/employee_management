@@ -1,3 +1,4 @@
+// Initial blank employee object used to reset or initialize the employee form
 export const initialEmployee = {
   e_id: "",
   first_name: "",
@@ -29,6 +30,7 @@ export const initialEmployee = {
   bank_account: "",
 };
 
+// Fields that are required in the employee form before submission
 export const requiredFields = [
   "e_id",
   "first_name",
@@ -58,6 +60,7 @@ export const requiredFields = [
   "bank_account",
 ];
 
+// Dropdown options for selecting visible columns in the employee table
 export const columnOptions = [
     { label: "Employee ID", value: "e_id" },
     { label: "Last Name", value: "last_name" },

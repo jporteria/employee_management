@@ -24,6 +24,7 @@ const PayrollDashboard = () => {
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [activityLog, setActivityLog] = useState([]);
   const [activityDialogVisible, setActivityDialogVisible] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState([
     "e_id",
     "last_name",
@@ -33,9 +34,11 @@ const PayrollDashboard = () => {
     "province",
   ]);
 
+  // References for toast messages and data table
   const toastRef = useRef(null);
   const dt = useRef(null);
 
+  // Fetch activity logs from backend API
   const fetchActivityLogs = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/activity-logs");
@@ -51,6 +54,7 @@ const PayrollDashboard = () => {
     }
   };
 
+  // Apply selected theme to the app
   const applyTheme = (themeName) => {
     let themeLink = document.getElementById("theme-link");
 
@@ -67,22 +71,23 @@ const PayrollDashboard = () => {
     }
   };
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
+  // Toggle between light and dark themes
   const toggleTheme = () => {
     const newTheme = isDarkMode
       ? "bootstrap4-light-blue"
       : "bootstrap4-dark-blue";
     applyTheme(newTheme);
     setIsDarkMode(!isDarkMode);
-    localStorage.setItem("theme", newTheme);
+    localStorage.setItem("theme", newTheme); // Store theme selection in local storage
   };
 
+  // Fetch employee data from backend API
   const fetchEmployees = async () => {
     const res = await axios.get("http://localhost:5000/api/employees");
     setEmployees(res.data);
   };
 
+  // Fetch employees and activity logs on component mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const isSavedDark = savedTheme === "bootstrap4-dark-blue";
@@ -104,18 +109,21 @@ const PayrollDashboard = () => {
 
     fetchEmployees();
     fetchActivityLogs();
-  }, []);
+  }, []); // Empty dependency array to run this effect only once on mount
 
+  // Open the employee form dialog to add a new employee
   const openNew = () => {
     setCurrentEmployee(initialEmployee);
     setIsEdit(false);
     setEmployeeDialog(true);
   };
 
+  // Close the employee form dialog
   const hideDialog = () => {
     setEmployeeDialog(false);
   };
 
+  // Save employee (either add new or update existing based on isEdit flag)
   const saveEmployee = async () => {
     try {
       if (isEdit) {
@@ -141,8 +149,8 @@ const PayrollDashboard = () => {
           detail: "Employee added",
         });
       }
-      setEmployeeDialog(false);
-      fetchEmployees();
+      setEmployeeDialog(false); // Close dialog after saving
+      fetchEmployees(); // Refresh employee data
     } catch (error) {
       toastRef.current.show({
         severity: "error",
@@ -151,28 +159,30 @@ const PayrollDashboard = () => {
       });
       console.log(error);
     }
-    console.log(activityLog);
   };
 
+  // Edit an existing employee
   const editEmployee = (employee) => {
     setCurrentEmployee({ ...employee });
     setIsEdit(true);
-    setEmployeeDialog(true);
+    setEmployeeDialog(true); // Open dialog in edit mode
   };
 
+  // Prompt to delete an employee (show confirmation dialog)
   const promptDeleteEmployee = (employee) => {
     setEmployeeToDelete(employee);
     setDeleteEmployeeDialog(true);
   };
 
+  // Confirm deletion of an employee
   const confirmDeleteEmployee = async () => {
     try {
       await axios.delete(
         `http://localhost:5000/api/employees/${employeeToDelete.id}`
       );
-      setDeleteEmployeeDialog(false);
-      fetchEmployees();
-      fetchActivityLogs();
+      setDeleteEmployeeDialog(false); // Close delete dialog
+      fetchEmployees(); // Refresh employee data
+      fetchActivityLogs(); // Refresh activity logs
       toastRef.current.show({
         severity: "success",
         summary: "Deleted",
@@ -188,35 +198,21 @@ const PayrollDashboard = () => {
     }
   };
 
+  // Export employee data to CSV
   const exportCSV = () => {
     dt.current.exportCSV();
   };
 
-  const employeeDialogFooter = (
-    <>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={hideDialog}
-      />
-      <Button
-        label="Save"
-        icon="pi pi-check"
-        className="p-button-text"
-        onClick={saveEmployee}
-      />
-    </>
-  );
-
   return (
     <div className="w-[99vw] h-[100vh] px-5">
+      {/* Toast notifications */}
       <Toast ref={toastRef} />
       <div className="flex items-center my-3 max-md:flex-col">
         <h2 className="text-2xl whitespace-nowrap mr-5 max-md:mb-5">
           Master - Employee
         </h2>
         <div className="flex w-full justify-between gap-2">
+          {/* Add employee button */}
           <Button
             raised
             style={{ background: "#77dd77", color: "black" }}
@@ -225,18 +221,21 @@ const PayrollDashboard = () => {
             onClick={openNew}
           />
           <div className="flex gap-2 items-center">
+            {/* Export CSV button */}
             <Button
               style={{ background: "#e0f7fa", color: "black" }}
               label="Export to CSV"
               icon="pi pi-upload"
               onClick={() => exportCSV(false)}
             />
+            {/* Activity log button */}
             <Button
               icon="pi pi-clock"
               style={{ background: "#fff3cd", color: "black" }}
               label="Activity Log"
               onClick={() => setActivityDialogVisible(true)}
             />
+            {/* Theme toggle button */}
             <SelectButton
               value={isDarkMode ? "Dark" : "Light"}
               options={["Light", "Dark"]}
@@ -249,7 +248,6 @@ const PayrollDashboard = () => {
                   className={`pi ${option === "Dark" ? "pi-moon" : "pi-sun"}`}
                 />
               )}
-              // className="p-button-rounded"
               className="theme-toggle-button"
               tooltip="Toggle Theme"
               tooltipOptions={{ position: "left" }}
@@ -259,6 +257,7 @@ const PayrollDashboard = () => {
       </div>
 
       <div style={{ backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff" }}>
+        {/* Employee table */}
         <EmployeeTable
           dt={dt}
           employees={employees}
@@ -271,20 +270,23 @@ const PayrollDashboard = () => {
         />
       </div>
 
+      {/* Employee form dialog */}
       <EmployeeForm
         currentEmployee={currentEmployee}
         setCurrentEmployee={setCurrentEmployee}
         visible={employeeDialog}
         onHide={hideDialog}
-        footer={employeeDialogFooter}
         isEdit={isEdit}
+        onSave={saveEmployee}
       />
+      {/* Delete confirmation dialog */}
       <DeleteConfirmDialog
         visible={deleteEmployeeDialog}
         onHide={() => setDeleteEmployeeDialog(false)}
         onConfirm={confirmDeleteEmployee}
         employee={employeeToDelete}
       />
+      {/* Activity log dialog */}
       <ActivityLogDialog
         visible={activityDialogVisible}
         onHide={() => setActivityDialogVisible(false)}

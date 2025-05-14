@@ -1,5 +1,6 @@
 import { Dialog } from "primereact/dialog";
 
+// Component to display a modal dialog with a list of activity logs
 const ActivityLogDialog = ({ visible, onHide, logs }) => {
   return (
     <Dialog
