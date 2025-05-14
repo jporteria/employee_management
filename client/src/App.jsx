@@ -4,7 +4,6 @@ import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import axios from "axios";
 import "./App.css";
-// import "primereact/resources/themes/bootstrap4-dark-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
@@ -25,6 +24,7 @@ const PayrollDashboard = () => {
   const [activityLog, setActivityLog] = useState([]);
   const [activityDialogVisible, setActivityDialogVisible] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1000);
   const [selectedColumns, setSelectedColumns] = useState([
     "e_id",
     "last_name",
@@ -37,6 +37,15 @@ const PayrollDashboard = () => {
   // References for toast messages and data table
   const toastRef = useRef(null);
   const dt = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Fetch activity logs from backend API
   const fetchActivityLogs = async () => {
@@ -224,7 +233,7 @@ const PayrollDashboard = () => {
             {/* Export CSV button */}
             <Button
               style={{ background: "#e0f7fa", color: "black" }}
-              label="Export to CSV"
+              label={isSmallScreen ? "" : "Export to CSV"}
               icon="pi pi-upload"
               onClick={() => exportCSV(false)}
             />
@@ -232,7 +241,7 @@ const PayrollDashboard = () => {
             <Button
               icon="pi pi-clock"
               style={{ background: "#fff3cd", color: "black" }}
-              label="Activity Log"
+              label={isSmallScreen ? "" : "Activity Log"}
               onClick={() => setActivityDialogVisible(true)}
             />
             {/* Theme toggle button */}

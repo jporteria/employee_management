@@ -6,12 +6,12 @@ import { InputText } from "primereact/inputtext";
 import { initialEmployee, requiredFields } from "../constants/employeeFields";
 
 const EmployeeForm = ({
-  currentEmployee,
-  setCurrentEmployee,
-  visible,
-  onHide,
-  isEdit,
-  onSave,
+  currentEmployee,    // Object representing the employee being created or edited
+  setCurrentEmployee, // Function to update the current employee state
+  visible,            // Control the visibility of the form dialog
+  onHide,             // Function to close the Dialog
+  isEdit,             // Indicate whether the form is in edit mode
+  onSave,             // Save employee data
 }) => {
   const [errors, setErrors] = useState({});
   const inputRefs = useRef({});
@@ -120,6 +120,7 @@ const EmployeeForm = ({
 
             {key === "birthday" || key === "date_hired" ? (
               <Calendar
+                icon="pi pi-calendar"
                 showIcon
                 id={key}
                 value={
